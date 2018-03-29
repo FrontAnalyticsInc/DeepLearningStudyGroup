@@ -34,7 +34,7 @@ def neural_network_model(data):
     l3 = tf.nn.relu(l3)
 
     output = tf.matmul(l3, output_layer['weights']) + output_layer['biases']
-
+    # [0,0,0,0,0,2,0,.06,0,0]
     return output
 
 def train_neural_network(x):
