@@ -6,10 +6,12 @@ import matplotlib.gridspec as gridspec
 import os
 
 
+
 X_dim = 784
 z_dim = 100
 y_dim = 10
 h_dim = 128
+
 
 def xavier_init(size):
     '''stddev is standard deviation.
@@ -23,7 +25,11 @@ def xavier_init(size):
 with tf.name_scope("Descriminator_Variables"):
     X = tf.placeholder(tf.float32, shape=[None, 784], name='x')
 
+
     D_W1= tf.Variable(xavier_init([X_dim+y_dim, 128]), name='D_W1')
+
+
+
     D_b1= tf.Variable(tf.zeros(shape=[128]), name='D_b1')
 
     D_W2= tf.Variable(xavier_init([128, 1]), name='D_W2')
@@ -34,12 +40,14 @@ theta_D = [D_W1, D_W2, D_b1, D_b2]
 
 # Generator Net
 
+
 y = tf.placeholder(tf.float32, shape=[None, y_dim], name='Generator_Conditions')
 
 with tf.name_scope("Generator_Variables"):
     Z = tf.placeholder(tf.float32, shape=[None, 100], name='z')
 
     G_W1 = tf.Variable(xavier_init([z_dim+y_dim, 128]), name='G_W1')
+
     G_b1 = tf.Variable(tf.zeros(shape=[128]), name='G_b1')
 
     G_W2 = tf.Variable(xavier_init([128,784]), name="G_W2")
@@ -48,13 +56,16 @@ with tf.name_scope("Generator_Variables"):
 theta_G = [G_W1, G_W2, G_b1, G_b2]
 
 
+
 def generator(z, y):
+
     '''takes 100-dimensional vector and
         returns 784-dimensional vector,
         which is MNIST image (28x28)'''
     with tf.name_scope("generator_net"):
         inputs = tf.concat(values=[z, y], axis=1)
         G_h1 = tf.nn.relu(tf.matmul(inputs, G_W1) + G_b1)
+
         G_log_prob = tf.matmul(G_h1, G_W2) + G_b2
         G_prob = tf.nn.sigmoid(G_log_prob)
 
@@ -65,6 +76,7 @@ def descriminator(x, y):
      which represents a probability of real MNIST image.'''
     inputs = tf.concat(values=[x, y], axis=1)
     D_h1 = tf.nn.relu(tf.matmul(inputs, D_W1) + D_b1)
+
     D_logit = tf.matmul(D_h1, D_W2) + D_b2
     D_prob = tf.nn.sigmoid(D_logit)
 
@@ -87,10 +99,17 @@ def plot(samples):
     return fig
 
 
+
 G_sample = generator(Z, y)
 with tf.name_scope("descriminator_net"):
     D_real, D_logit_real = descriminator(X, y)
     D_fake, D_logit_fake = descriminator(G_sample, y)
+
+# G_sample = generator(Z)
+# with tf.name_scope("descriminator_net"):
+#     D_real, D_logit_real = descriminator(X)
+#     D_fake, D_logit_fake = descriminator(G_sample)
+
 
 
 '''we use negative sign for the loss
@@ -111,8 +130,6 @@ with tf.name_scope("G_Train"):
     # Only update G(X)'s parameters, so var_list = theta_G
     G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_G)
 
-
-### X and y is this real?
 
 
 mb_size = 128
@@ -136,6 +153,7 @@ with tf.Session() as sess:
 
     for it in range(1000000):
         if it % 1000 == 0:
+
             y_sample = np.zeros(shape=[16, y_dim])
             y_sample[:, 5] = 1
             samples = sess.run(G_sample, feed_dict={Z:sample_Z(16, Z_dim), y:y_sample})
@@ -153,6 +171,8 @@ with tf.Session() as sess:
 
         _, D_loss_curr = sess.run([D_solver, D_loss], feed_dict={X: X_mb, Z: sample_Z(mb_size, Z_dim), y:y_mb})
         _, G_loss_curr = sess.run([G_solver, G_loss], feed_dict={Z: sample_Z(mb_size, Z_dim), y:y_mb})
+
+
 
         if it % 1000 == 0:
             print('Iter: {}'.format(it))
