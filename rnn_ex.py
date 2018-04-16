@@ -27,18 +27,13 @@ def recurrent_neural_network(x):
              'biases':tf.Variable(tf.random_normal([n_classes]))}
 
     # print("first x is: %s", x)
+    #switches batch size with sequence size
     x = tf.transpose(x, [1,0,2])
-    print(x)
-    # print("second x is: %s", x)
-    x = tf.reshape(x,[-1,chunk_size])
-    print("\n\n\n\n")
-    print(x)
-    # print("new x is: %s", x)
-    x = tf.split(x, n_chunks, 0)
-    print("\n\n\n\n")
-    # print("final x is:", x)
 
-    print(x)
+    x = tf.reshape(x,[-1,chunk_size])
+    '''splitting each image into 28 rows'''
+    x = tf.split(x, n_chunks, 0)
+
     lstm_cell = rnn.BasicLSTMCell(rnn_size, state_is_tuple=True)
     # stacked_lstm = rnn.MultiRNNCell([make_cell(rnn_size) for _ in range(n_layers)], state_is_tuple=True)
     # outputs, states = rnn.static_rnn(stacked_lstm, x, dtype=tf.float32)
@@ -61,6 +56,7 @@ def train_neural_network(x):
             for _ in range(int(mnist.train.num_examples/batch_size)):
                 epoch_x, epoch_y = mnist.train.next_batch(batch_size)
                 epoch_x = epoch_x.reshape((batch_size,n_chunks,chunk_size))
+                print(epoch_x)
                 _, c = sess.run([optimizer, cost], feed_dict={x: epoch_x, y: epoch_y})
                 epoch_loss += c
             print('Epoch', epoch+1, 'completed out of', hm_epochs, 'loss:', epoch_loss)

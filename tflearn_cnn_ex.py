@@ -23,3 +23,5 @@ model.fit({'input': X}, {'targets': Y}, n_epoch=10, validation_set=({'input': te
     snapshot_step=500, show_metric=True, run_id='mnist')
 
 model.save('quickest.model')
+model.load('quickest.model')
+model.predict(data)
